@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
-import { Plus, Pencil, Trash2, X, Grid3x3 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Grid3x3, Camera, FolderOpen, Hash } from 'lucide-react';
+
+const GRADIENT_COLORS = [
+    'from-amber-400 to-orange-500',
+    'from-blue-400 to-indigo-500',
+    'from-emerald-400 to-teal-500',
+    'from-rose-400 to-pink-500',
+    'from-violet-400 to-purple-500',
+    'from-cyan-400 to-blue-500',
+];
 
 export default function AdminCategories() {
     const [categories, setCategories] = useState([]);
@@ -65,75 +74,112 @@ export default function AdminCategories() {
         catch (err) { alert(err.response?.data?.message || 'Failed to delete'); }
     };
 
-    if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div></div>;
+    if (loading) return (
+        <div className="flex items-center justify-center py-32">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-gray-200 border-t-amber-500 mx-auto" />
+                <p className="text-sm text-gray-400 mt-4">Loading categories...</p>
+            </div>
+        </div>
+    );
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Manage Categories</h1>
-                <button onClick={openCreate} className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Manage Categories</h1>
+                    <p className="text-sm text-gray-400 mt-0.5">{categories.length} categories</p>
+                </div>
+                <button onClick={openCreate} className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2">
                     <Plus className="h-4 w-4" /> Add Category
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categories.map(c => (
-                    <div key={c.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                                    <Grid3x3 className="h-5 w-5 text-amber-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">{c.name}</h3>
-                                    <p className="text-xs text-gray-400">/{c.slug}</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-1">
-                                <button onClick={() => openEdit(c)} className="p-1.5 text-gray-400 hover:text-amber-600 rounded"><Pencil className="h-4 w-4" /></button>
-                                <button onClick={() => handleDelete(c.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded"><Trash2 className="h-4 w-4" /></button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {categories.map((c, i) => (
+                    <div key={c.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 hover:-translate-y-0.5">
+                        {/* Gradient Banner */}
+                        <div className={`h-20 bg-gradient-to-r ${GRADIENT_COLORS[i % GRADIENT_COLORS.length]} relative`}>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                                <Camera className="h-16 w-16 text-white" />
                             </div>
                         </div>
-                        {c.description && <p className="text-sm text-gray-500 mt-3">{c.description}</p>}
-                        <div className="flex gap-3 mt-3 text-xs text-gray-400">
-                            <span>{c.services_count || c.services?.length || 0} services</span>
-                            <span>{c.portfolios_count || c.portfolios?.length || 0} portfolios</span>
+
+                        <div className="p-5">
+                            <div className="flex items-start justify-between mb-2">
+                                <div>
+                                    <h3 className="font-bold text-gray-900 text-lg">{c.name}</h3>
+                                    <p className="text-xs text-gray-400 font-mono">/{c.slug}</p>
+                                </div>
+                                <div className="flex gap-1">
+                                    <button onClick={() => openEdit(c)} className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition">
+                                        <Pencil className="h-4 w-4" />
+                                    </button>
+                                    <button onClick={() => handleDelete(c.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition">
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {c.description && <p className="text-sm text-gray-500 mb-4 line-clamp-2">{c.description}</p>}
+
+                            <div className="flex gap-3">
+                                <div className="flex items-center gap-1.5 text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg">
+                                    <Camera className="h-3.5 w-3.5" />
+                                    <span className="font-semibold">{c.services_count || c.services?.length || 0}</span>
+                                    <span className="text-blue-400">services</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-sm bg-violet-50 text-violet-600 px-3 py-1.5 rounded-lg">
+                                    <FolderOpen className="h-3.5 w-3.5" />
+                                    <span className="font-semibold">{c.portfolios_count || c.portfolios?.length || 0}</span>
+                                    <span className="text-violet-400">portfolios</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
 
             {categories.length === 0 && (
-                <div className="text-center py-20 text-gray-400"><Grid3x3 className="h-16 w-16 mx-auto mb-4 opacity-50" /><p>No categories yet.</p></div>
+                <div className="text-center py-20">
+                    <div className="bg-gray-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+                        <Grid3x3 className="h-10 w-10 text-gray-300" />
+                    </div>
+                    <p className="text-gray-500 font-medium">No categories yet</p>
+                    <p className="text-xs text-gray-400 mt-1">Create your first category to organize services</p>
+                </div>
             )}
 
             {showForm && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
-                    <div className="bg-white rounded-xl max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold text-gray-900">{editing ? 'Edit Category' : 'Add Category'}</h2>
-                            <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X className="h-5 w-5" /></button>
-                        </div>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
+                    <div className="bg-white rounded-2xl max-w-md w-full animate-[fadeIn_0.2s_ease]" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-6 border-b border-gray-100">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500" placeholder="e.g. Portrait Photography" />
+                                <h2 className="text-lg font-bold text-gray-900">{editing ? 'Edit Category' : 'New Category'}</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">{editing ? 'Update category details' : 'Organize your photography services'}</p>
+                            </div>
+                            <button onClick={() => setShowForm(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition"><X className="h-5 w-5" /></button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Name</label>
+                                <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="e.g. Portrait Photography" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                <textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500" placeholder="Brief description..." />
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+                                <textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="Brief description of this category..." />
                             </div>
                             {!editing && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Image (optional)</label>
-                                    <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="w-full border border-gray-200 rounded-lg px-3 py-2 outline-none text-sm" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Image (optional)</label>
+                                    <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="w-full border border-gray-200 rounded-xl px-4 py-2 outline-none text-sm file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-amber-50 file:text-amber-600 file:text-sm file:font-medium" />
                                 </div>
                             )}
-                            <div className="flex gap-3">
-                                <button type="submit" disabled={saving} className="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-lg font-medium transition disabled:opacity-50">
+                            <div className="flex gap-3 pt-2">
+                                <button type="submit" disabled={saving} className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white py-2.5 rounded-xl font-semibold transition-all disabled:opacity-50 text-sm shadow-lg shadow-amber-500/20">
                                     {saving ? 'Saving...' : editing ? 'Update' : 'Create'}
                                 </button>
-                                <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm font-medium">Cancel</button>
                             </div>
                         </form>
                     </div>

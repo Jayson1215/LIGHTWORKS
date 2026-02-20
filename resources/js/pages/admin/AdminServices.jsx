@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
-import { Plus, Pencil, Trash2, X, Camera } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Camera, Clock, Tag, CheckCircle, XCircle, DollarSign } from 'lucide-react';
 
 export default function AdminServices() {
     const [services, setServices] = useState([]);
@@ -11,9 +11,7 @@ export default function AdminServices() {
     const [form, setForm] = useState({ category_id: '', name: '', description: '', price: '', duration_hours: 1, inclusions: '', is_available: true });
     const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    useEffect(() => { loadData(); }, []);
 
     const loadData = () => {
         Promise.all([api.get('/services'), api.get('/categories')])
@@ -66,45 +64,72 @@ export default function AdminServices() {
 
     const handleDelete = async (id) => {
         if (!confirm('Delete this service?')) return;
-        try {
-            await api.delete(`/admin/services/${id}`);
-            loadData();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Failed to delete');
-        }
+        try { await api.delete(`/admin/services/${id}`); loadData(); }
+        catch (err) { alert(err.response?.data?.message || 'Failed to delete'); }
     };
 
-    if (loading) return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div></div>;
+    if (loading) return (
+        <div className="flex items-center justify-center py-32">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-[3px] border-gray-200 border-t-amber-500 mx-auto" />
+                <p className="text-sm text-gray-400 mt-4">Loading services...</p>
+            </div>
+        </div>
+    );
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Manage Services</h1>
-                <button onClick={openCreate} className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Manage Services</h1>
+                    <p className="text-sm text-gray-400 mt-0.5">{services.length} services available</p>
+                </div>
+                <button onClick={openCreate} className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2">
                     <Plus className="h-4 w-4" /> Add Service
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 {services.map(svc => (
-                    <div key={svc.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <div className="flex items-start justify-between mb-3">
-                            <div>
-                                <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{svc.category?.name}</span>
-                                <h3 className="font-semibold text-gray-900 mt-1">{svc.name}</h3>
+                    <div key={svc.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 hover:-translate-y-0.5">
+                        {/* Card Header with gradient */}
+                        <div className="bg-gradient-to-br from-gray-50 to-amber-50/30 px-5 pt-5 pb-4 relative">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-100/80 px-2.5 py-1 rounded-lg">
+                                        <Tag className="h-3 w-3" />
+                                        {svc.category?.name}
+                                    </span>
+                                    <h3 className="font-bold text-gray-900 mt-2 text-lg">{svc.name}</h3>
+                                </div>
+                                <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg ${svc.is_available ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
+                                    {svc.is_available ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                    {svc.is_available ? 'Active' : 'Inactive'}
+                                </span>
                             </div>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${svc.is_available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {svc.is_available ? 'Available' : 'Unavailable'}
-                            </span>
                         </div>
-                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">{svc.description}</p>
-                        <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold text-amber-600">₱{Number(svc.price).toLocaleString()}</span>
-                            <div className="flex gap-1">
-                                <button onClick={() => openEdit(svc)} className="p-2 text-gray-400 hover:text-amber-600 rounded-lg hover:bg-amber-50">
-                                    <Pencil className="h-4 w-4" />
+
+                        <div className="px-5 pb-5">
+                            <p className="text-sm text-gray-500 line-clamp-2 mb-4">{svc.description}</p>
+
+                            {/* Stats row */}
+                            <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100">
+                                <div className="flex items-center gap-1.5 text-sm">
+                                    <DollarSign className="h-4 w-4 text-emerald-500" />
+                                    <span className="font-bold text-gray-900">₱{Number(svc.price).toLocaleString()}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                                    <Clock className="h-4 w-4 text-blue-400" />
+                                    <span>{svc.duration_hours}h</span>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => openEdit(svc)} className="flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium text-gray-600 bg-gray-50 hover:bg-amber-50 hover:text-amber-700 rounded-xl transition">
+                                    <Pencil className="h-3.5 w-3.5" /> Edit
                                 </button>
-                                <button onClick={() => handleDelete(svc.id)} className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50">
+                                <button onClick={() => handleDelete(svc.id)} className="flex items-center justify-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition">
                                     <Trash2 className="h-4 w-4" />
                                 </button>
                             </div>
@@ -114,59 +139,65 @@ export default function AdminServices() {
             </div>
 
             {services.length === 0 && (
-                <div className="text-center py-20 text-gray-400">
-                    <Camera className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p>No services yet. Create your first service!</p>
+                <div className="text-center py-20">
+                    <div className="bg-gray-50 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
+                        <Camera className="h-10 w-10 text-gray-300" />
+                    </div>
+                    <p className="text-gray-500 font-medium">No services yet</p>
+                    <p className="text-xs text-gray-400 mt-1">Create your first service to get started!</p>
                 </div>
             )}
 
             {/* Form Modal */}
             {showForm && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
-                    <div className="bg-white rounded-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold text-gray-900">{editing ? 'Edit Service' : 'Add Service'}</h2>
-                            <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X className="h-5 w-5" /></button>
-                        </div>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
+                    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto animate-[fadeIn_0.2s_ease]" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-6 border-b border-gray-100">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                <select value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} required className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500">
+                                <h2 className="text-lg font-bold text-gray-900">{editing ? 'Edit Service' : 'New Service'}</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">{editing ? 'Update service details' : 'Create a new photography service'}</p>
+                            </div>
+                            <button onClick={() => setShowForm(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition"><X className="h-5 w-5" /></button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+                                <select value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} required className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm bg-gray-50">
                                     <option value="">Select category</option>
                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Name</label>
+                                <input type="text" required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="e.g. Wedding Premium Package" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                <textarea rows={3} required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+                                <textarea rows={3} required value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price (₱)</label>
-                                    <input type="number" required min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Price (₱)</label>
+                                    <input type="number" required min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration (hours)</label>
-                                    <input type="number" required min="1" value={form.duration_hours} onChange={e => setForm({ ...form, duration_hours: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500" />
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Duration (hours)</label>
+                                    <input type="number" required min="1" value={form.duration_hours} onChange={e => setForm({ ...form, duration_hours: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Inclusions (one per line)</label>
-                                <textarea rows={4} value={form.inclusions} onChange={e => setForm({ ...form, inclusions: e.target.value })} className="w-full border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-amber-500" placeholder="50 edited photos\n1-hour session\nOnline gallery" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Inclusions (one per line)</label>
+                                <textarea rows={4} value={form.inclusions} onChange={e => setForm({ ...form, inclusions: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="50 edited photos&#10;1-hour session&#10;Online gallery" />
                             </div>
-                            <div className="flex items-center gap-2">
-                                <input type="checkbox" checked={form.is_available} onChange={e => setForm({ ...form, is_available: e.target.checked })} id="available" className="rounded border-gray-300" />
-                                <label htmlFor="available" className="text-sm text-gray-700">Available for booking</label>
+                            <div className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-xl">
+                                <input type="checkbox" checked={form.is_available} onChange={e => setForm({ ...form, is_available: e.target.checked })} id="available" className="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+                                <label htmlFor="available" className="text-sm text-gray-700 font-medium">Available for booking</label>
                             </div>
-                            <div className="flex gap-3">
-                                <button type="submit" disabled={saving} className="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-lg font-medium transition disabled:opacity-50">
+                            <div className="flex gap-3 pt-2">
+                                <button type="submit" disabled={saving} className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white py-2.5 rounded-xl font-semibold transition-all disabled:opacity-50 text-sm shadow-lg shadow-amber-500/20">
                                     {saving ? 'Saving...' : editing ? 'Update Service' : 'Create Service'}
                                 </button>
-                                <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition">Cancel</button>
+                                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition text-sm font-medium">Cancel</button>
                             </div>
                         </form>
                     </div>

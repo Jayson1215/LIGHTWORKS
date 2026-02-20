@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
+import { getImageSrc } from '../../utils/imageHelpers';
 import { Calendar, Search, Eye, CheckCircle, XCircle, Clock, Filter, MapPin, Phone, Mail, ArrowRight, X } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -136,7 +137,14 @@ export default function AdminBookings() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="py-3.5 px-5 text-gray-700 font-medium">{b.service?.name}</td>
+                                        <td className="py-3.5 px-5">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img src={getImageSrc(b.service, 'services', b.id)} alt={b.service?.name} className="w-full h-full object-cover" />
+                                                </div>
+                                                <span className="text-gray-700 font-medium">{b.service?.name}</span>
+                                            </div>
+                                        </td>
                                         <td className="py-3.5 px-5">
                                             <p className="text-gray-700">{new Date(b.booking_date).toLocaleDateString()}</p>
                                             <p className="text-xs text-gray-400">{b.booking_time}</p>

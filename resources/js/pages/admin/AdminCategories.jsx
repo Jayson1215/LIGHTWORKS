@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
+import { getImageSrc } from '../../utils/imageHelpers';
 import { Plus, Pencil, Trash2, X, Grid3x3, Camera, FolderOpen, Hash } from 'lucide-react';
 
 const GRADIENT_COLORS = [
@@ -50,9 +51,13 @@ export default function AdminCategories() {
             if (form.image) data.append('image', form.image);
 
             if (editing) {
-                await api.put(`/admin/categories/${editing.id}`, {
-                    name: form.name,
-                    description: form.description,
+                const editData = new FormData();
+                editData.append('name', form.name);
+                editData.append('description', form.description);
+                if (form.image) editData.append('image', form.image);
+                editData.append('_method', 'PUT');
+                await api.post(`/admin/categories/${editing.id}`, editData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
                 await api.post('/admin/categories', data, {
@@ -98,11 +103,10 @@ export default function AdminCategories() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {categories.map((c, i) => (
                     <div key={c.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 hover:-translate-y-0.5">
-                        {/* Gradient Banner */}
-                        <div className={`h-20 bg-gradient-to-r ${GRADIENT_COLORS[i % GRADIENT_COLORS.length]} relative`}>
-                            <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                                <Camera className="h-16 w-16 text-white" />
-                            </div>
+                        {/* Category Image Banner */}
+                        <div className="h-28 relative overflow-hidden">
+                            <img src={getImageSrc(c, 'categories', i)} alt={c.name} className="w-full h-full object-cover" />
+                            <div className={`absolute inset-0 bg-gradient-to-t from-black/30 to-transparent`} />
                         </div>
 
                         <div className="p-5">
@@ -169,12 +173,15 @@ export default function AdminCategories() {
                                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
                                 <textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="Brief description of this category..." />
                             </div>
-                            {!editing && (
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Image (optional)</label>
-                                    <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="w-full border border-gray-200 rounded-xl px-4 py-2 outline-none text-sm file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-amber-50 file:text-amber-600 file:text-sm file:font-medium" />
-                                </div>
-                            )}
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{editing ? 'Change Image (optional)' : 'Image (optional)'}</label>
+                                {editing?.image && !form.image && (
+                                    <div className="mb-2 rounded-xl overflow-hidden h-24 bg-gray-50">
+                                        <img src={getImageSrc(editing, 'categories', 0)} alt="Current" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
+                                <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="w-full border border-gray-200 rounded-xl px-4 py-2 outline-none text-sm file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-amber-50 file:text-amber-600 file:text-sm file:font-medium" />
+                            </div>
                             <div className="flex gap-3 pt-2">
                                 <button type="submit" disabled={saving} className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white py-2.5 rounded-xl font-semibold transition-all disabled:opacity-50 text-sm shadow-lg shadow-amber-500/20">
                                     {saving ? 'Saving...' : editing ? 'Update' : 'Create'}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
-import { Plus, Pencil, Trash2, X, Camera, Star, ImageIcon } from 'lucide-react';
+import { getImageSrc } from '../../utils/imageHelpers';
+import { Plus, Pencil, Trash2, X, Camera, Star, ImageIcon, Upload } from 'lucide-react';
 
 export default function AdminPortfolios() {
     const [portfolios, setPortfolios] = useState([]);
@@ -44,11 +45,15 @@ export default function AdminPortfolios() {
             if (form.image) data.append('image', form.image);
 
             if (editing) {
-                await api.put(`/admin/portfolios/${editing.id}`, {
-                    category_id: form.category_id,
-                    title: form.title,
-                    description: form.description,
-                    featured: form.featured,
+                const editData = new FormData();
+                editData.append('category_id', form.category_id);
+                editData.append('title', form.title);
+                editData.append('description', form.description);
+                editData.append('featured', form.featured ? '1' : '0');
+                if (form.image) editData.append('image', form.image);
+                editData.append('_method', 'PUT');
+                await api.post(`/admin/portfolios/${editing.id}`, editData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
                 await api.post('/admin/portfolios', data, {
@@ -95,12 +100,12 @@ export default function AdminPortfolios() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                {portfolios.map(p => (
+                {portfolios.map((p, idx) => (
                     <div key={p.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 hover:-translate-y-0.5">
                         {/* Image Area */}
                         <div className="h-44 bg-gradient-to-br from-gray-100 via-amber-50 to-rose-50 flex items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <Camera className="h-12 w-12 text-gray-300 group-hover:scale-110 transition-transform" />
+                            <img src={getImageSrc(p, 'portfolios', idx)} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                             {p.featured && (
                                 <div className="absolute top-3 right-3 bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-lg">
                                     <Star className="h-3 w-3 fill-current" /> Featured
@@ -162,12 +167,15 @@ export default function AdminPortfolios() {
                                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
                                 <textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="Brief description of this work..." />
                             </div>
-                            {!editing && (
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Image</label>
-                                    <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="w-full border border-gray-200 rounded-xl px-4 py-2 outline-none text-sm file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-amber-50 file:text-amber-600 file:text-sm file:font-medium" />
-                                </div>
-                            )}
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{editing ? 'Change Image (optional)' : 'Image'}</label>
+                                {editing?.image && !form.image && (
+                                    <div className="mb-2 rounded-xl overflow-hidden h-32 bg-gray-50">
+                                        <img src={getImageSrc(editing, 'portfolios', 0)} alt="Current" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
+                                <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="w-full border border-gray-200 rounded-xl px-4 py-2 outline-none text-sm file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-amber-50 file:text-amber-600 file:text-sm file:font-medium" />
+                            </div>
                             <div className="flex items-center gap-3 bg-amber-50/50 px-4 py-3 rounded-xl">
                                 <input type="checkbox" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} id="featured" className="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
                                 <label htmlFor="featured" className="text-sm text-gray-700 font-medium flex items-center gap-1.5">

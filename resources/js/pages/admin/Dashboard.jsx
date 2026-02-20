@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api';
+import { getImageSrc } from '../../utils/imageHelpers';
 import { Calendar, DollarSign, Users, Camera, TrendingUp, Clock, ArrowUpRight, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function Dashboard() {
@@ -46,10 +47,8 @@ export default function Dashboard() {
         <div className="space-y-8">
             {/* Welcome Banner */}
             <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-6 sm:p-8 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-600 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
-                </div>
+                <img src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?w=1920&q=80" alt="Studio" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/70 to-gray-900/50" />
                 <div className="relative">
                     <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="h-5 w-5 text-amber-400" />
@@ -139,7 +138,9 @@ export default function Dashboard() {
                                     <div key={svc.id}>
                                         <div className="flex items-center justify-between mb-1.5">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-gray-300">#{i + 1}</span>
+                                                <div className="h-8 w-8 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <img src={getImageSrc(svc, 'services', i)} alt={svc.name} className="w-full h-full object-cover" />
+                                                </div>
                                                 <span className="text-sm font-medium text-gray-700">{svc.name}</span>
                                             </div>
                                             <span className="text-sm font-bold text-amber-600">{svc.bookings_count}</span>

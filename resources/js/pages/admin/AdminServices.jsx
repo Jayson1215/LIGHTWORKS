@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
+import { getImageSrc } from '../../utils/imageHelpers';
 import { Plus, Pencil, Trash2, X, Camera, Clock, Tag, CheckCircle, XCircle, DollarSign } from 'lucide-react';
 
 export default function AdminServices() {
@@ -44,14 +45,34 @@ export default function AdminServices() {
         e.preventDefault();
         setSaving(true);
         try {
-            const data = {
-                ...form,
-                inclusions: form.inclusions ? form.inclusions.split('\n').map(s => s.trim()).filter(Boolean) : [],
-            };
+            const inclusions = form.inclusions ? form.inclusions.split('\n').map(s => s.trim()).filter(Boolean) : [];
             if (editing) {
-                await api.put(`/admin/services/${editing.id}`, data);
+                const editData = new FormData();
+                editData.append('category_id', form.category_id);
+                editData.append('name', form.name);
+                editData.append('description', form.description);
+                editData.append('price', form.price);
+                editData.append('duration_hours', form.duration_hours);
+                editData.append('is_available', form.is_available ? '1' : '0');
+                inclusions.forEach((inc, i) => editData.append(`inclusions[${i}]`, inc));
+                if (form.image) editData.append('image', form.image);
+                editData.append('_method', 'PUT');
+                await api.post(`/admin/services/${editing.id}`, editData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             } else {
-                await api.post('/admin/services', data);
+                const data = new FormData();
+                data.append('category_id', form.category_id);
+                data.append('name', form.name);
+                data.append('description', form.description);
+                data.append('price', form.price);
+                data.append('duration_hours', form.duration_hours);
+                data.append('is_available', form.is_available ? '1' : '0');
+                inclusions.forEach((inc, i) => data.append(`inclusions[${i}]`, inc));
+                if (form.image) data.append('image', form.image);
+                await api.post('/admin/services', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             }
             setShowForm(false);
             loadData();
@@ -90,10 +111,14 @@ export default function AdminServices() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {services.map(svc => (
+                {services.map((svc, idx) => (
                     <div key={svc.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden group hover:shadow-xl hover:shadow-gray-100/50 transition-all duration-300 hover:-translate-y-0.5">
-                        {/* Card Header with gradient */}
-                        <div className="bg-gradient-to-br from-gray-50 to-amber-50/30 px-5 pt-5 pb-4 relative">
+                        {/* Service Image */}
+                        <div className="h-36 relative overflow-hidden">
+                            <img src={getImageSrc(svc, 'services', idx)} alt={svc.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                        </div>
+                        <div className="px-5 pt-4 pb-4 relative">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-100/80 px-2.5 py-1 rounded-lg">
@@ -110,7 +135,7 @@ export default function AdminServices() {
                         </div>
 
                         <div className="px-5 pb-5">
-                            <p className="text-sm text-gray-500 line-clamp-2 mb-4">{svc.description}</p>
+                            <p className="text-sm text-gray-500 line-clamp-2 mb-4 mt-2">{svc.description}</p>
 
                             {/* Stats row */}
                             <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-100">
@@ -188,6 +213,15 @@ export default function AdminServices() {
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1.5">Inclusions (one per line)</label>
                                 <textarea rows={4} value={form.inclusions} onChange={e => setForm({ ...form, inclusions: e.target.value })} className="w-full border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm" placeholder="50 edited photos&#10;1-hour session&#10;Online gallery" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{editing ? 'Change Image (optional)' : 'Image (optional)'}</label>
+                                {editing?.image && !form.image && (
+                                    <div className="mb-2 rounded-xl overflow-hidden h-28 bg-gray-50">
+                                        <img src={getImageSrc(editing, 'services', 0)} alt="Current" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
+                                <input type="file" accept="image/*" onChange={e => setForm({ ...form, image: e.target.files[0] })} className="w-full border border-gray-200 rounded-xl px-4 py-2 outline-none text-sm file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-amber-50 file:text-amber-600 file:text-sm file:font-medium" />
                             </div>
                             <div className="flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-xl">
                                 <input type="checkbox" checked={form.is_available} onChange={e => setForm({ ...form, is_available: e.target.checked })} id="available" className="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />

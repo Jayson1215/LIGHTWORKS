@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PortfolioController;
 use App\Http\Controllers\Api\ServiceController;
@@ -73,5 +74,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/users/{user}', [AdminController::class, 'updateUser']);
         Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
         Route::post('/users/admin', [AdminController::class, 'createAdmin']);
+
+        // Notifications
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::put('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+        Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     });
 });

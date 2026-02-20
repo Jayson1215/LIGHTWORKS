@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingAddon;
+use App\Models\Notification;
 use App\Models\Payment;
 use App\Models\Service;
 use Illuminate\Http\Request;
@@ -123,6 +124,22 @@ class BookingController extends Controller
         ]);
 
         $booking->load(['service.category', 'payment', 'addons', 'user']);
+
+        // Create admin notification for new booking
+        Notification::create([
+            'type' => 'new_booking',
+            'title' => 'New Booking Received',
+            'message' => "{$request->customer_name} booked {$service->name} on {$request->booking_date} at {$request->booking_time}.",
+            'data' => [
+                'booking_id' => $booking->id,
+                'booking_reference' => $booking->booking_reference,
+                'customer_name' => $request->customer_name,
+                'service_name' => $service->name,
+                'booking_date' => $request->booking_date,
+                'booking_time' => $request->booking_time,
+                'total' => $total,
+            ],
+        ]);
 
         return response()->json([
             'message' => 'Booking created successfully',

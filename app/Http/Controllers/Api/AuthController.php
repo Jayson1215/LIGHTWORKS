@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,18 @@ class AuthController extends Controller
             'longitude' => $request->longitude,
             'password' => Hash::make($request->password),
             'role' => 'customer',
+        ]);
+
+        // Create admin notification for new user
+        Notification::create([
+            'type' => 'new_user',
+            'title' => 'New User Registered',
+            'message' => "{$user->name} ({$user->email}) just created an account.",
+            'data' => [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+            ],
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;

@@ -11,7 +11,9 @@ class Booking extends Model
 
     protected $fillable = [
         'booking_reference', 'user_id', 'service_id', 'booking_date', 'booking_time',
-        'customer_name', 'customer_email', 'customer_phone', 'special_requests',
+        'customer_name', 'customer_email', 'customer_phone',
+        'location_address', 'location_lat', 'location_lng',
+        'special_requests',
         'subtotal', 'tax', 'discount', 'total', 'status', 'payment_method'
     ];
 

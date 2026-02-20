@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import { ArrowLeft, Calendar, Clock, Plus, Minus, X } from 'lucide-react';
+import LocationPicker from '../components/LocationPicker';
 
 const ADDON_OPTIONS = [
     { name: 'Extra Prints (10 pcs)', price: 500 },
@@ -28,6 +29,9 @@ export default function BookingCreate() {
         customer_name: user?.name || '',
         customer_email: user?.email || '',
         customer_phone: user?.phone || '',
+        location_address: user?.address || '',
+        location_lat: user?.latitude || null,
+        location_lng: user?.longitude || null,
         special_requests: '',
         payment_method: 'online',
         addons: [],
@@ -190,6 +194,20 @@ export default function BookingCreate() {
                                 className="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
                                 placeholder="Any special requirements or preferences..." />
                         </div>
+                    </div>
+
+                    {/* Shoot Location */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h2 className="font-semibold text-gray-900 mb-4">Shoot Location</h2>
+                        <LocationPicker
+                            address={form.location_address}
+                            latitude={form.location_lat}
+                            longitude={form.location_lng}
+                            onChange={({ address, latitude, longitude }) =>
+                                setForm({ ...form, location_address: address, location_lat: latitude, location_lng: longitude })
+                            }
+                            label="Where should the shoot take place?"
+                        />
                     </div>
 
                     {/* Add-ons */}

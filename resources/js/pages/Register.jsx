@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Camera, Eye, EyeOff, CheckCircle, X } from 'lucide-react';
+import LocationPicker from '../components/LocationPicker';
 
 export default function Register() {
     const { register } = useAuth();
     const navigate = useNavigate();
     const [form, setForm] = useState({
-        name: '', email: '', phone: '', password: '', password_confirmation: ''
+        name: '', email: '', phone: '', password: '', password_confirmation: '',
+        address: '', latitude: null, longitude: null,
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -104,6 +106,16 @@ export default function Register() {
                             placeholder="09XX XXX XXXX"
                         />
                     </div>
+
+                    {/* Location Picker */}
+                    <LocationPicker
+                        address={form.address}
+                        latitude={form.latitude}
+                        longitude={form.longitude}
+                        onChange={({ address, latitude, longitude }) => setForm({ ...form, address, latitude, longitude })}
+                        label="Your Location (optional)"
+                        compact
+                    />
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>

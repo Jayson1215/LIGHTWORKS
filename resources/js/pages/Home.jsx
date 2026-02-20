@@ -62,8 +62,8 @@ export default function Home() {
     const [isTransitioning, setIsTransitioning] = useState(false);
 
     useEffect(() => {
-        api.get('/portfolios?featured=1').then(r => setFeatured(r.data.slice(0, 6))).catch(() => {});
-        api.get('/services?available=1').then(r => setServices(r.data.slice(0, 3))).catch(() => {});
+        api.get('/portfolios?featured=1').then(r => { if (Array.isArray(r.data)) setFeatured(r.data.slice(0, 6)); }).catch(() => {});
+        api.get('/services?available=1').then(r => { if (Array.isArray(r.data)) setServices(r.data.slice(0, 3)); }).catch(() => {});
     }, []);
 
     // Auto-advance slideshow

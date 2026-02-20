@@ -24,13 +24,13 @@ export default function Portfolio() {
     const [lightbox, setLightbox] = useState(null);
 
     useEffect(() => {
-        api.get('/categories').then(r => setCategories(r.data)).catch(() => {});
+        api.get('/categories').then(r => { if (Array.isArray(r.data)) setCategories(r.data); }).catch(() => {});
         loadPortfolios();
     }, []);
 
     const loadPortfolios = (categoryId = null) => {
         const params = categoryId ? `?category_id=${categoryId}` : '';
-        api.get(`/portfolios${params}`).then(r => setPortfolios(r.data)).catch(() => {});
+        api.get(`/portfolios${params}`).then(r => { if (Array.isArray(r.data)) setPortfolios(r.data); }).catch(() => {});
         setActiveCategory(categoryId);
     };
 

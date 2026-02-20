@@ -21,13 +21,13 @@ export default function Services() {
     const [activeCategory, setActiveCategory] = useState(null);
 
     useEffect(() => {
-        api.get('/categories').then(r => setCategories(r.data)).catch(() => {});
+        api.get('/categories').then(r => { if (Array.isArray(r.data)) setCategories(r.data); }).catch(() => {});
         loadServices();
     }, []);
 
     const loadServices = (categoryId = null) => {
         const params = categoryId ? `?category_id=${categoryId}` : '';
-        api.get(`/services${params}`).then(r => setServices(r.data)).catch(() => {});
+        api.get(`/services${params}`).then(r => { if (Array.isArray(r.data)) setServices(r.data); }).catch(() => {});
         setActiveCategory(categoryId);
     };
 

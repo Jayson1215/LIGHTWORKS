@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Camera, Eye, EyeOff } from 'lucide-react';
+import { Camera, Eye, EyeOff, CheckCircle, X } from 'lucide-react';
 
 export default function Register() {
     const { register } = useAuth();
@@ -12,6 +12,7 @@ export default function Register() {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [showPass, setShowPass] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,7 +20,7 @@ export default function Register() {
         setLoading(true);
         try {
             await register(form);
-            navigate('/');
+            setShowSuccess(true);
         } catch (err) {
             if (err.response?.data?.errors) {
                 setErrors(err.response.data.errors);
@@ -35,6 +36,31 @@ export default function Register() {
 
     return (
         <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+            {/* Success Popup */}
+            {showSuccess && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => { setShowSuccess(false); navigate('/login'); }}>
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center relative animate-[fadeIn_0.3s_ease]" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => { setShowSuccess(false); navigate('/login'); }}
+                            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                        <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <CheckCircle className="h-8 w-8 text-green-600" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">Account Created!</h2>
+                        <p className="text-gray-500 text-sm mb-6">Your account has been successfully created. Please sign in with your credentials to continue.</p>
+                        <button
+                            onClick={() => { setShowSuccess(false); navigate('/login'); }}
+                            className="w-full bg-amber-600 hover:bg-amber-700 text-white py-2.5 rounded-lg font-medium transition"
+                        >
+                            Go to Sign In
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <Camera className="h-12 w-12 text-amber-600 mx-auto mb-3" />

@@ -37,9 +37,7 @@ export function AuthProvider({ children }) {
 
     const register = async (data) => {
         const res = await api.post('/register', data);
-        localStorage.setItem('token', res.data.token);
-        setToken(res.data.token);
-        setUser(res.data.user);
+        // Don't auto-login — user must sign in manually
         return res.data.user;
     };
 

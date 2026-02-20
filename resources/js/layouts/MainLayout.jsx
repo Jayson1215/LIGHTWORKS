@@ -9,6 +9,7 @@ export default function MainLayout() {
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     // Close mobile menu on route change
     useEffect(() => { setMobileOpen(false); }, [location.pathname]);
@@ -21,6 +22,8 @@ export default function MainLayout() {
     }, []);
 
     const handleLogout = async () => {
+        setShowLogoutModal(false);
+        setMobileOpen(false);
         await logout();
         navigate('/');
     };
@@ -88,7 +91,7 @@ export default function MainLayout() {
                                             <span className="text-sm font-semibold text-amber-700">{user.name.charAt(0).toUpperCase()}</span>
                                         </div>
                                         <span className="text-sm text-gray-600 hidden lg:block">{user.name}</span>
-                                        <button onClick={handleLogout} className="text-gray-400 hover:text-red-500 transition p-1" title="Logout">
+                                        <button onClick={() => setShowLogoutModal(true)} className="text-gray-400 hover:text-red-500 transition p-1" title="Logout">
                                             <LogOut className="h-4 w-4" />
                                         </button>
                                     </div>
@@ -148,7 +151,7 @@ export default function MainLayout() {
                                         </div>
                                         <span className="text-sm text-gray-600">{user.name}</span>
                                     </div>
-                                    <button onClick={handleLogout} className="text-red-500 text-sm font-medium">Logout</button>
+                                    <button onClick={() => setShowLogoutModal(true)} className="text-red-500 text-sm font-medium">Logout</button>
                                 </div>
                             </>
                         ) : (
@@ -160,6 +163,35 @@ export default function MainLayout() {
                     </div>
                 </div>
             </nav>
+
+            {/* Logout Confirmation Modal */}
+            {showLogoutModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setShowLogoutModal(false)}>
+                    <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl animate-[fadeIn_0.2s_ease]" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 text-center">
+                            <div className="mx-auto w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                                <LogOut className="h-6 w-6 text-red-500" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">Log Out</h3>
+                            <p className="text-sm text-gray-500">Are you sure you want to log out of your account?</p>
+                        </div>
+                        <div className="border-t border-gray-100 px-6 py-4 flex gap-3">
+                            <button
+                                onClick={() => setShowLogoutModal(false)}
+                                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition shadow-sm shadow-red-500/20"
+                            >
+                                Yes, Log Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <main className="flex-1">
                 <Outlet />

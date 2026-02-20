@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { getImageSrc } from '../../utils/imageHelpers';
-import { Plus, Pencil, Trash2, X, Camera, Star, ImageIcon, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Camera, Star, ImageIcon } from 'lucide-react';
 
 export default function AdminPortfolios() {
     const [portfolios, setPortfolios] = useState([]);

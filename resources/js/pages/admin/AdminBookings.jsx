@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api';
 import { getImageSrc } from '../../utils/imageHelpers';
-import { Calendar, Search, Eye, CheckCircle, XCircle, Clock, Filter, MapPin, Phone, Mail, ArrowRight, X } from 'lucide-react';
+import { Calendar, Search, Eye, CheckCircle, XCircle, Clock, MapPin, Phone, ArrowRight, X } from 'lucide-react';
 
 const STATUS_CONFIG = {
     pending: { color: 'bg-amber-50 text-amber-600', dot: 'bg-amber-500', label: 'Pending' },

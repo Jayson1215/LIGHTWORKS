@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ServiceController extends Controller
@@ -75,6 +76,9 @@ class ServiceController extends Controller
         }
 
         if ($request->hasFile('image')) {
+            if ($service->image) {
+                Storage::disk('public')->delete($service->image);
+            }
             $data['image'] = $request->file('image')->store('services', 'public');
         }
 
@@ -85,6 +89,9 @@ class ServiceController extends Controller
 
     public function destroy(Service $service)
     {
+        if ($service->image) {
+            Storage::disk('public')->delete($service->image);
+        }
         $service->delete();
         return response()->json(['message' => 'Service deleted successfully']);
     }

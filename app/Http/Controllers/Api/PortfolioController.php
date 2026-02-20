@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PortfolioController extends Controller
 {
@@ -64,6 +65,9 @@ class PortfolioController extends Controller
         $data = $request->only('category_id', 'title', 'description', 'featured');
 
         if ($request->hasFile('image')) {
+            if ($portfolio->image) {
+                Storage::disk('public')->delete($portfolio->image);
+            }
             $data['image'] = $request->file('image')->store('portfolios', 'public');
         }
 
@@ -74,6 +78,9 @@ class PortfolioController extends Controller
 
     public function destroy(Portfolio $portfolio)
     {
+        if ($portfolio->image) {
+            Storage::disk('public')->delete($portfolio->image);
+        }
         $portfolio->delete();
         return response()->json(['message' => 'Portfolio item deleted successfully']);
     }

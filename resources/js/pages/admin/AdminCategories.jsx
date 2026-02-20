@@ -3,15 +3,6 @@ import api from '../../api';
 import { getImageSrc } from '../../utils/imageHelpers';
 import { Plus, Pencil, Trash2, X, Grid3x3, Camera, FolderOpen, Hash } from 'lucide-react';
 
-const GRADIENT_COLORS = [
-    'from-amber-400 to-orange-500',
-    'from-blue-400 to-indigo-500',
-    'from-emerald-400 to-teal-500',
-    'from-rose-400 to-pink-500',
-    'from-violet-400 to-purple-500',
-    'from-cyan-400 to-blue-500',
-];
-
 export default function AdminCategories() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);

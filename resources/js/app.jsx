@@ -33,18 +33,29 @@ import AdminPayments from './pages/admin/AdminPayments';
 function ProtectedRoute({ children }) {
     const { user, loading } = useAuth();
     if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div></div>;
-    return user ? children : <Navigate to="/login" />;
+    if (!user) return <Navigate to="/login" replace />;
+    return children;
 }
 
 function AdminRoute({ children }) {
     const { user, loading } = useAuth();
-    if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div></div>;
-    if (!user) return <Navigate to="/login" />;
-    if (user.role !== 'admin') return <Navigate to="/" />;
+    
+    if (loading) {
+        return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600"></div></div>;
+    }
+    
+    if (!user || !user.id) {
+        return <Navigate to="/login" replace />;
+    }
+    
+    if (user.role !== 'admin') {
+        return <Navigate to="/" replace />;
+    }
+    
     return children;
 }
 
-export default function App() {
+function AppRoutes() {
     return (
         <Routes>
             <Route element={<MainLayout />}>
@@ -73,13 +84,23 @@ export default function App() {
     );
 }
 
+export default function App() {
+    return (
+        <AuthProvider>
+            <BrowserRouter>
+                <AppRoutes />
+            </BrowserRouter>
+        </AuthProvider>
+    );
+}
+
 // Mount React app
-createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <AuthProvider>
-                <App />
-            </AuthProvider>
-        </BrowserRouter>
-    </React.StrictMode>
-);
+const root = document.getElementById('root');
+if (root) {
+    const app = createRoot(root);
+    app.render(
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    );
+}

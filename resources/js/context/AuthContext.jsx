@@ -1,17 +1,19 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import api from '../api';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
+    const hasCheckedAuth = useRef(false);
 
     useEffect(() => {
-        if (token) {
+        if (token && !hasCheckedAuth.current) {
             fetchUser();
-        } else {
+            hasCheckedAuth.current = true;
+        } else if (!token) {
             setLoading(false);
         }
     }, [token]);

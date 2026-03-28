@@ -24,8 +24,15 @@ export default function Portfolio() {
     const [lightbox, setLightbox] = useState(null);
 
     useEffect(() => {
-        api.get('/categories').then(r => setCategories(r.data)).catch(() => {});
-        loadPortfolios();
+        Promise.all([
+            api.get('/categories'),
+            api.get('/portfolios')
+        ])
+            .then(([catRes, portRes]) => {
+                setCategories(catRes.data);
+                setPortfolios(portRes.data);
+            })
+            .catch(() => {});
     }, []);
 
     const loadPortfolios = (categoryId = null) => {

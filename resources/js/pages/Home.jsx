@@ -62,8 +62,15 @@ export default function Home() {
     const [isTransitioning, setIsTransitioning] = useState(false);
 
     useEffect(() => {
-        api.get('/portfolios?featured=1').then(r => setFeatured(r.data.slice(0, 6))).catch(() => {});
-        api.get('/services?available=1').then(r => setServices(r.data.slice(0, 3))).catch(() => {});
+        Promise.all([
+            api.get('/portfolios?featured=1'),
+            api.get('/services?available=1')
+        ])
+            .then(([portfolioRes, servicesRes]) => {
+                setFeatured(portfolioRes.data.slice(0, 6));
+                setServices(servicesRes.data.slice(0, 3));
+            })
+            .catch(() => {});
     }, []);
 
     // Auto-advance slideshow

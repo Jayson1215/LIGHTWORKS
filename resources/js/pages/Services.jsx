@@ -21,8 +21,15 @@ export default function Services() {
     const [activeCategory, setActiveCategory] = useState(null);
 
     useEffect(() => {
-        api.get('/categories').then(r => setCategories(r.data)).catch(() => {});
-        loadServices();
+        Promise.all([
+            api.get('/categories'),
+            api.get('/services')
+        ])
+            .then(([catRes, servRes]) => {
+                setCategories(catRes.data);
+                setServices(servRes.data);
+            })
+            .catch(() => {});
     }, []);
 
     const loadServices = (categoryId = null) => {

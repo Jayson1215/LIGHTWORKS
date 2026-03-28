@@ -31,8 +31,8 @@ class DashboardController extends Controller
         // Monthly revenue for the last 6 months
         $monthlyRevenue = Payment::where('status', 'paid')
             ->where('created_at', '>=', now()->subMonths(6))
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, SUM(amount) as total")
-            ->groupBy('month')
+            ->selectRaw("TO_CHAR(created_at, 'YYYY-MM') as month, SUM(amount) as total")
+            ->groupBy(DB::raw("TO_CHAR(created_at, 'YYYY-MM')"))
             ->orderBy('month')
             ->get();
 
